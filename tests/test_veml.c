@@ -1,4 +1,5 @@
 #include "unity.h"
+#include <string.h>
 #include "../src/veml3328.h"
 
 

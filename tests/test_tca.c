@@ -32,6 +32,15 @@ int i2c_read_byte(int i2c_fd, uint8_t dev_addr_7bit, uint8_t *out) {
     return 0; // Not used in these tests
 }
 
+void setUp(void) {
+    dummy_i2c_fd        = 0;
+    dummy_last_dev_addr = 0;
+    dummy_last_data     = 0;
+    dummy_fail_write    = 0;
+    
+}
+
+void tearDown(void) {}
 
 /* Tests */
 void test_channel(void) {
