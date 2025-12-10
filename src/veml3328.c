@@ -6,6 +6,12 @@
 extern int i2c_write_bytes(int fd, uint8_t dev_addr, uint8_t *buf, int length);
 extern int i2c_read_bytes(int fd, uint8_t dev_addr, uint8_t *buf, int length);
 
+/* Sensor initial configuration */
+int veml3328_config(int i2c_fd, uint8_t dev_addr) {
+    uint16_t conf_value = 0x0000; // Default config
+    return veml3328_write_reg(i2c_fd, dev_addr, VEML3328_REG_CONF, conf_value);
+}
+
 /* write 16-bit register */
 int veml3328_write_reg(int i2c_fd, uint8_t dev_addr, uint8_t reg, uint16_t value) {
     uint8_t buf[3];

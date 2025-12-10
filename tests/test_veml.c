@@ -66,7 +66,7 @@ void test_read_raw (void) {
     dummy_read_buf[5] = (dummy_values[2] >> 8) & 0xFF;  // BLUE MSB
     
     veml3328_raw_data_t data;
-    int ret = veml3328_read_raw(0, VEML3328_I2C_ADDR, &data);
+    int ret = veml3328_read_all(0, VEML3328_I2C_ADDR, &data);
     TEST_ASSERT_EQUAL_INT(VEML3328_OK, ret);
     
     TEST_ASSERT_EQUAL_UINT16(dummy_values[0], data.red);
@@ -75,12 +75,27 @@ void test_read_raw (void) {
 }
 
 void test_norm (void) {
-    veml3328_raw_data_t raw = {100, 50, 25};
-    veml3328_norm_rgb_t norm = veml3328_norm(&raw);
+    veml3328_raw_data_t raw = {
+        .clear = 100,
+        .red = 50,
+        .green = 25,
+        .blue = 25
+    };
+    
+    veml3328_cfg_t cfg = {
+        .gain_factor = 1.0f,
+        .dg_factor   = 1.0f,
+        .sens_factor = 1.0f,
+        .it_ms       = 100.0f,
+        .ds_it_ms    = 100.0f,
+        .dark_offset = 0
+    };
+    
+    veml3328_norm_rgb_t norm = veml3328_norm_colour(&raw, &cfg);
 
-    TEST_ASSERT_FLOAT_WITHIN(0.01, 1.0, norm.red);
-    TEST_ASSERT_FLOAT_WITHIN(0.01, 0.5, norm.green);
-    TEST_ASSERT_FLOAT_WITHIN(0.01, 0.25, norm.blue);
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 1.0f, norm.red);
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 0.5f, norm.green);
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 0.25f, norm.blue);
 }
 
 void test_config (void) {
@@ -89,6 +104,18 @@ void test_config (void) {
 
     TEST_ASSERT_EQUAL_HEX8(VEML3328_REG_CONF, dummy_written_buf[0]); // Register
     TEST_ASSERT_EQUAL_HEX16(0x0000, (dummy_written_buf[1] | (dummy_written_buf[2] << 8))); // Config value
+}
+
+void setUp(void) {
+    // Reset dummy variables before each test
+    memset(dummy_written_buf, 0, sizeof(dummy_written_buf));
+    memset(dummy_read_buf, 0, sizeof(dummy_read_buf));
+    dummy_written_length = 0;
+    dummy_fail = 0;
+}
+
+void tearDown(void) {
+    // Nothing to clean up after each test
 }
 
 int main(void) {

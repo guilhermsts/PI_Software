@@ -53,6 +53,9 @@ typedef struct {
     uint16_t dark_offset;
 } veml3328_cfg_t;
 
+/* Sensor initial configuration */
+int veml3328_config(int i2c_fd, uint8_t dev_addr);
+
 /* write 16-bit address */
 int veml3328_write_reg(int i2c_fd, uint8_t dev_addr, uint8_t reg,uint16_t value);
 

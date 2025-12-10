@@ -72,7 +72,7 @@ void test_DisableAll(void) {
 
 void test_i2c_write_failure(void) {
     dummy_fail_write = 1;
-    int ret = test_tca_select_channel(1, 0x70, 2);
+    int ret = tca_select_channel(1, 0x70, 2);
     TEST_ASSERT_EQUAL_INT(TCA_ERR_I2C_WRITE, ret);
 }
 
