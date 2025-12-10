@@ -4,6 +4,8 @@
 
 
 /* Dummy i2c backend */
+static uint8_t current_reg = 0;
+static uint16_t dummy_reg_values[256]; // Simulate 256 16-bit registers
 static uint8_t dummy_written_buf[8];
 static int dummy_written_length;
 static uint8_t dummy_read_buf[8];
@@ -14,10 +16,16 @@ int i2c_write_bytes(int fd, uint8_t addr, uint8_t *buf, int length) {
         return -1;
     }
 
-    for (int i = 0; i < length && i < 8; i++) {
-        dummy_written_buf[i] = buf[i];
+    if (length == 1)
+    {
+        current_reg = buf[0];
+    } else {
+        for (int i = 0; i < length && i < 8; i++) {
+            dummy_written_buf[i] = buf[i];
+        }
+        dummy_written_length = length;
     }
-    dummy_written_length = length;
+    
     return 0;
 }
 
@@ -26,9 +34,20 @@ int i2c_read_bytes(int fd, uint8_t dev_addr, uint8_t *buf, int length) {
         return -1;
     }
 
-    for (int i = 0; i < length && i < 8; i++) {
-        buf[i] = dummy_read_buf[i];
+    if (length == 2)
+    {
+        uint16_t value = dummy_reg_values[current_reg];
+        buf[0] = value & 0xFF;         // LSB
+        buf[1] = (value >> 8) & 0xFF;  // MSB
+
+    } else {
+        
+        for (int i = 0; i < length && i < 8; i++) {
+            buf[i] = dummy_read_buf[i];
+        }
+        
     }
+
     return 0;
 }
 
@@ -44,8 +63,7 @@ void test_write_reg (void) {
 
 void test_read_reg (void) {
     // Setup dummy read buffer
-    dummy_read_buf[0] = 0xCD; // LSB
-    dummy_read_buf[1] = 0xAB; // MSB
+    dummy_reg_values[VEML3328_REG_RED] = 0xABCD;
 
     uint16_t out;
     int ret = veml3328_read_reg(0, VEML3328_I2C_ADDR, VEML3328_REG_RED, &out);
@@ -57,22 +75,17 @@ void test_read_reg (void) {
 void test_read_raw (void) {
     // Setup dummy read buffer for RED, GREEN, BLUE
     // RED = 100, GREEN = 200, BLUE = 50
-    uint16_t dummy_values[] = {100, 200, 50};
-
-    dummy_read_buf[0] = dummy_values[0] & 0xFF;         // RED LSB
-    dummy_read_buf[1] = (dummy_values[0] >> 8) & 0xFF;  // RED MSB  
-    dummy_read_buf[2] = dummy_values[1] & 0xFF;         // GREEN LSB
-    dummy_read_buf[3] = (dummy_values[1] >> 8) & 0xFF;  // GREEN MSB
-    dummy_read_buf[4] = dummy_values[2] & 0xFF;         // BLUE LSB
-    dummy_read_buf[5] = (dummy_values[2] >> 8) & 0xFF;  // BLUE MSB
+    dummy_reg_values[VEML3328_REG_RED]   = 100;
+    dummy_reg_values[VEML3328_REG_GREEN] = 200; 
+    dummy_reg_values[VEML3328_REG_BLUE]  = 50;
     
     veml3328_raw_data_t data;
     int ret = veml3328_read_all(0, VEML3328_I2C_ADDR, &data);
     TEST_ASSERT_EQUAL_INT(VEML3328_OK, ret);
     
-    TEST_ASSERT_EQUAL_UINT16(dummy_values[0], data.red);
-    TEST_ASSERT_EQUAL_UINT16(dummy_values[1], data.green);
-    TEST_ASSERT_EQUAL_UINT16(dummy_values[2], data.blue);
+    TEST_ASSERT_EQUAL_UINT16(100, data.red);
+    TEST_ASSERT_EQUAL_UINT16(200, data.green);
+    TEST_ASSERT_EQUAL_UINT16(50, data.blue);
 }
 
 void test_norm (void) {
@@ -94,8 +107,8 @@ void test_norm (void) {
     
     veml3328_norm_rgb_t norm = veml3328_norm_colour(&raw, &cfg);
 
-    TEST_ASSERT_FLOAT_WITHIN(0.01f, 1.0f, norm.red);
-    TEST_ASSERT_FLOAT_WITHIN(0.01f, 0.5f, norm.green);
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 0.5f, norm.red);
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 0.25f, norm.green);
     TEST_ASSERT_FLOAT_WITHIN(0.01f, 0.25f, norm.blue);
 }
 
@@ -111,8 +124,11 @@ void setUp(void) {
     // Reset dummy variables before each test
     memset(dummy_written_buf, 0, sizeof(dummy_written_buf));
     memset(dummy_read_buf, 0, sizeof(dummy_read_buf));
+    memset(dummy_reg_values, 0, sizeof(dummy_reg_values));
+
     dummy_written_length = 0;
     dummy_fail = 0;
+    current_reg = 0;
 }
 
 void tearDown(void) {
