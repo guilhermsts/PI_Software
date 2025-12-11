@@ -80,3 +80,17 @@ int i2c_read_bytes(int fd, uint8_t dev_addr, uint8_t *buf, int length) {
     
     return 0;
 }
+
+int i2c_write_byte(int fd, uint8_t dev_addr, uint8_t data) {
+    return i2c_write_bytes(fd, dev_addr, &data, 1);
+}
+
+int i2c_read_byte(int fd, uint8_t dev_addr, uint8_t *out) {
+    if (out == NULL)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+    
+    return i2c_read_bytes(fd, dev_addr, out, 1);
+}

@@ -3,7 +3,6 @@
 #include <stddef.h>
 
 extern int i2c_write_byte(int i2c_fd, uint8_t dev_addr_7bit, uint8_t data);
-
 extern int i2c_read_byte(int i2c_fd, uint8_t dev_addr_7bit, uint8_t *out);
 
 uint8_t tca_encode_channel(int channel) {
