@@ -5,7 +5,7 @@
 #include "veml3328.h"
 #include "tca9548a.h"
 
-#define I2C_DEV_PATH    "/dev/i2c-1"
+#define I2C_DEV_PATH    "/dev/i2c-1"  // !!!!!!!!! verificar na Pi ver comando "ls /dev/i2c* (chatgpt)"
 #define TCA9548A_ADDR   0x70
 #define VEML3328_ADDR   VEML3328_I2C_ADDR
 #define NUM_CHANNELS    8
@@ -34,7 +34,7 @@ int main(void) {
     for (int channel = 0; channel < NUM_CHANNELS; channel++) {
         
         /* Select channel TCA9548A */
-        if (tca9548a_select_channel(fd, TCA9548A_ADDR, channel) != 0) {
+        if (tca_select_channel(fd, TCA9548A_ADDR, channel) != TCA_OK) {
             fprintf(stderr, "Failed to select TCA9548A channel %d\n", channel);
             continue;
         }

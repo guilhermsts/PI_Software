@@ -3,7 +3,7 @@
 #include <stddef.h>
 
 /* external backend functions */
-extern int i2c_write_bytes(int fd, uint8_t dev_addr, uint8_t *buf, int length);
+extern int i2c_write_bytes(int fd, uint8_t dev_addr, const uint8_t *buf, int length);
 extern int i2c_read_bytes(int fd, uint8_t dev_addr, uint8_t *buf, int length);
 
 /* Sensor initial configuration */
