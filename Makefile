@@ -29,7 +29,7 @@ $(TEST_TCA_BIN): $(BUILD_DIR) $(UNITY) $(SRC_TCA) $(TEST_TCA)
 
 # VEML tests
 $(TEST_VEML_BIN): $(BUILD_DIR) $(UNITY) $(TEST_VEML) $(SRC_VEML)
-	$(CC) $(CFLAGS) -o $@ $(UNITY) $(TEST_VEML) $(SRC_VEML) 
+	$(CC) $(CFLAGS) -o $@ $(UNITY) $(TEST_VEML) $(SRC_VEML)
 
 .PHONY: test_veml test_tca test
 test_veml: $(TEST_VEML_BIN)
@@ -43,11 +43,17 @@ test: test_veml test_tca
 # Raspberry Pi specific application build
 PI_APP := $(BUILD_DIR)/pi_app
 PI_SRC := $(SRC_DIR)/main.c $(SRC_DIR)/i2c_driver_pi.c $(SRC_VEML) $(SRC_TCA)
+PI_TEST_SENSOR 	:= $(BUILD_DIR)/test_sensor
+PI_TEST_SRC 	:= $(SRC_DIR)/test_sensor.c $(SRC_DIR)/i2c_driver_pi.c $(SRC_VEML) $(SRC_TCA)
 
 .PHONY: pi_app
 pi_app: $(BUILD_DIR) $(PI_SRC)
 	$(CC) $(CFLAGS) -o $(PI_APP) $(PI_SRC)
 
+.PHONY: pi_test_sensor
+pi_test_sensor: $(BUILD_DIR) $(PI_TEST_SRC)
+	$(CC) $(CFLAGS) -o $(PI_TEST_SENSOR) $(PI_TEST_SRC)
+
 .PHONY: clean
 clean:
-	rm -f $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)

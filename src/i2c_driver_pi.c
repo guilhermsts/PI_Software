@@ -1,4 +1,4 @@
-#include "i2c_driver.h"
+#include "i2c_driver_pi.h"
 
 #include <stdio.h>
 #include <unistd.h>
