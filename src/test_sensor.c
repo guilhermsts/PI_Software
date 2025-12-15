@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    usleep(200000); // 200 ms
     for (int sample = 0; sample < num_samples; sample++) {
         /* Read raw data from VEML3328 */
         veml3328_raw_data_t raw_data;
@@ -91,7 +92,7 @@ int main(int argc, char *argv[]) {
         usleep(1000000);  // 1s delay between samples
     }
 
-    
+    tca_disable_all(fd, TCA9548A_ADDR);
 
     /* Close I2C bus */
     i2c_close_bus(fd);

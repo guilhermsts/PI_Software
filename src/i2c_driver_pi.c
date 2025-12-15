@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 
 int i2c_open_bus(const char *dev_path) {
@@ -93,4 +94,37 @@ int i2c_read_byte(int fd, uint8_t dev_addr, uint8_t *out) {
     }
     
     return i2c_read_bytes(fd, dev_addr, out, 1);
+}
+
+int i2c_write_read(int fd, uint8_t dev_addr, const uint8_t *write_buf, int write_length, uint8_t *read_buf, int read_length) {
+    if (fd < 0 || write_buf == NULL || write_length <= 0 || read_buf == NULL || read_length <= 0) {
+        errno = EINVAL;
+        return -1;
+    }
+    
+    struct i2c_msg msgs[2];
+    // Write message
+    msgs[0].addr = dev_addr;
+    msgs[0].flags = 0;                      // Write
+    msgs[0].len = (uint16_t)write_length;
+    msgs[0].buf = (uint8_t *)write_buf;
+    
+    // Read message
+    msgs[1].addr = dev_addr;
+    msgs[1].flags = I2C_M_RD;               // Read
+    msgs[1].len = (uint16_t)read_length;
+    msgs[1].buf = read_buf;
+    
+    struct i2c_rdwr_ioctl_data data = {
+        .msgs = msgs,
+        .nmsgs = 2
+    };
+
+    if (ioctl(fd, I2C_RDWR, &data) < 0) {
+        perror("Failed to perform I2C write-read transaction");
+        return -1;
+    }
+    
+    return 0;
+    
 }

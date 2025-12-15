@@ -4,7 +4,8 @@
 
 /* external backend functions */
 extern int i2c_write_bytes(int fd, uint8_t dev_addr, const uint8_t *buf, int length);
-extern int i2c_read_bytes(int fd, uint8_t dev_addr, uint8_t *buf, int length);
+//extern int i2c_read_bytes(int fd, uint8_t dev_addr, uint8_t *buf, int length);
+extern int i2c_write_read(int fd, uint8_t dev_addr, const uint8_t *write_buf, int write_length, uint8_t *read_buf, int read_length);
 
 /* Sensor initial configuration */
 int veml3328_config(int i2c_fd, uint8_t dev_addr) {
@@ -32,14 +33,14 @@ int veml3328_read_reg(int i2c_fd, uint8_t dev_addr, uint8_t reg, uint16_t *out) 
         return VEML3328_ERR_NULL;
     }
     
-    // Write register pointer
+    /* Write register pointer
     if (i2c_write_bytes(i2c_fd, dev_addr, &reg, 1) != 0){
         return VEML3328_ERR_I2C;
-    }
+    }*/
 
     uint8_t buf[2];
     // Read 2 bytes (LSB and MSB)
-    if (i2c_read_bytes(i2c_fd, dev_addr, buf, 2) != 0){
+    if (i2c_write_read(i2c_fd, dev_addr, &reg, 1, buf, 2) != 0){
         return VEML3328_ERR_I2C;
     }
 
