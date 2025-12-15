@@ -25,4 +25,6 @@ int i2c_write_byte(int i2c_fd, uint8_t dev_addr_7bit, uint8_t data);
 
 int i2c_read_byte(int i2c_fd, uint8_t dev_addr_7bit, uint8_t *out);
 
+int i2c_write_read(int fd, uint8_t dev_addr, const uint8_t *write_buf, int write_length, uint8_t *read_buf, int read_length);
+
 #endif // I2C_DRIVER_H
