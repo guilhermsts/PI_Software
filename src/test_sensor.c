@@ -79,6 +79,8 @@ int main(int argc, char *argv[]) {
             break;
         }
 
+        printf("Raw: C=%u R=%u G=%u B=%u\n", raw_data.clear, raw_data.red, raw_data.green, raw_data.blue);
+
         /* Compute normalized RGB values */
         veml3328_norm_rgb_t norm_rgb = veml3328_norm_colour(&raw_data, &test_cfg);
 
