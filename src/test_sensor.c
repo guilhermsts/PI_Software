@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "i2c_driver.h"
+#include "i2c_driver_pi.h"
 #include "tca9548a.h"
 #include "veml3328.h"
 
