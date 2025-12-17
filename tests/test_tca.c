@@ -85,6 +85,21 @@ void test_i2c_write_failure(void) {
     TEST_ASSERT_EQUAL_INT(TCA_ERR_I2C_WRITE, ret);
 }
 
+void test_tca_read_control_ok(void) {
+    dummy_fail_write = 0;
+    dummy_last_data = 0x20; // what i2c_read_byte returns in your mock
+    uint8_t out = 0;
+    int ret = tca_read_control(7, 0x70, &out);
+    TEST_ASSERT_EQUAL_INT(TCA_OK, ret);
+    TEST_ASSERT_EQUAL_HEX8(0x20, out);
+}
+
+void test_tca_read_control_null(void) {
+    int ret = tca_read_control(7, 0x70, NULL);
+    TEST_ASSERT_EQUAL_INT(TCA_ERR_I2C_READ, ret);
+}
+
+
 int main(void) {
     UNITY_BEGIN();
 
@@ -93,6 +108,9 @@ int main(void) {
     RUN_TEST(test_tca_select_channel);
     RUN_TEST(test_DisableAll);
     RUN_TEST(test_i2c_write_failure);
+    RUN_TEST(test_tca_read_control_ok);
+    RUN_TEST(test_tca_read_control_null);
+
 
     return UNITY_END();
 }

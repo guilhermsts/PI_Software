@@ -11,7 +11,7 @@ static int dummy_written_length;
 static uint8_t dummy_read_buf[8];
 static int dummy_fail = 0;
 
-int i2c_write_bytes(int fd, uint8_t addr, uint8_t *buf, int length) {
+int i2c_write_bytes(int fd, uint8_t addr, const uint8_t *buf, int length) {
     if (dummy_fail) {
         return -1;
     }
@@ -29,27 +29,27 @@ int i2c_write_bytes(int fd, uint8_t addr, uint8_t *buf, int length) {
     return 0;
 }
 
-int i2c_read_bytes(int fd, uint8_t dev_addr, uint8_t *buf, int length) {
-    if (dummy_fail) {
+int i2c_write_read(int fd, uint8_t dev_addr, const uint8_t *wbuf, int wlen, uint8_t *rbuf, int rlen) {
+    (void)fd;
+    (void)dev_addr;
+
+    if (!wbuf || wlen != 1 || !rbuf || rlen != 2) {
         return -1;
     }
+    uint8_t reg = wbuf[0];
+    uint16_t val = dummy_reg_values[reg];
 
-    if (length == 2)
-    {
-        uint16_t value = dummy_reg_values[current_reg];
-        buf[0] = value & 0xFF;         // LSB
-        buf[1] = (value >> 8) & 0xFF;  // MSB
-
+    // little-endian: LSB first, like your driver assembles it
+    rbuf[0] = (uint8_t)(val & 0xFF);
+    rbuf[1] = (uint8_t)(val >> 8);
+    
+    if (dummy_fail) {
+        return -1;
     } else {
-        
-        for (int i = 0; i < length && i < 8; i++) {
-            buf[i] = dummy_read_buf[i];
-        }
-        
+        return 0;
     }
-
-    return 0;
 }
+
 
 /* Test Functions */
 void test_write_reg (void) {
