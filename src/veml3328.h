@@ -69,7 +69,7 @@ int veml3328_read_all(int i2c_fd, uint8_t dev_addr, veml3328_raw_data_t *out);
 float veml3328_counts_to_irradiance(const veml3328_cfg_t *cfg, uint16_t counts);
 
 /* Wavelength estimation */
-float veml3328_estimate_wavelength(const veml3328_raw_data_t *raw);
+float veml3328_estimate_wavelength(uint16_t red, uint16_t green, uint16_t blue);
 
 /* convert raw data to normalized RGB */
 veml3328_norm_rgb_t veml3328_norm_colour(const veml3328_raw_data_t *raw, const veml3328_cfg_t *cfg);
