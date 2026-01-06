@@ -85,8 +85,16 @@ int main(int argc, char *argv[]) {
         /* Compute normalized RGB values */
         veml3328_norm_rgb_t norm_rgb = veml3328_norm_colour(&raw_data, &test_cfg);
 
+        int R255 = (int)(norm_rgb.red * 255.0f + 0.5f);
+        int G255 = (int)(norm_rgb.green * 255.0f + 0.5f);
+        int B255 = (int)(norm_rgb.blue * 255.0f + 0.5f);
+
+        if (R255 < 0) R255 = 0; else if (R255 > 255) R255 = 255;
+        if (G255 < 0) G255 = 0; else if (G255 > 255) G255 = 255;
+        if (B255 < 0) B255 = 0; else if (B255 > 255) B255 = 255;
+
         printf("Normalized RGB Values of sample %d:\n", sample + 1);
-        printf("Red: %.3f  ,  Green: %.3f  ,  Blue:  %.3f\n", norm_rgb.red, norm_rgb.green, norm_rgb.blue);
+        printf("Red: %d  ,  Green: %d  ,  Blue:  %d\n", R255, G255, B255);
         printf("Intensity: %.3f uW/cm^2  ,  Wavelength: %.1f\n", norm_rgb.irradiance_uW_per_cm2, norm_rgb.wavelength);
 
         usleep(1000000);  // 1s delay between samples

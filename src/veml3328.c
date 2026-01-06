@@ -86,16 +86,13 @@ float veml3328_counts_to_irradiance(const veml3328_cfg_t *cfg, uint16_t counts) 
     return irradiance;
 }
 
-float veml3328_estimate_wavelength(const veml3328_raw_data_t *raw) {
-    if (raw == NULL){
+float veml3328_estimate_wavelength(uint16_t red, uint16_t green, uint16_t blue) {
+    uint32_t sum = (uint32_t)red + (uint32_t)green + (uint32_t)blue;
+    if (sum == 0){
         return 0.0f;
     }
 
-    uint32_t sum = raw->red + raw->green + raw->blue;
-    if (sum == 0) {
-        return 0.0f;
-    }
-    float wavelength = (raw->red * VEML3328_WAVELENGTH_RED + raw->green * VEML3328_WAVELENGTH_GREEN +raw->blue * VEML3328_WAVELENGTH_BLUE) / (float)sum;
+    float wavelength = ((float)red * VEML3328_WAVELENGTH_RED + (float)green * VEML3328_WAVELENGTH_GREEN + (float)blue * VEML3328_WAVELENGTH_BLUE) / (float)sum;
     
     return wavelength;
 }
@@ -106,6 +103,7 @@ veml3328_norm_rgb_t veml3328_norm_colour(const veml3328_raw_data_t *raw, const v
     out.red = out.green = out.blue = 0.0f;
     out.intensity_counts = 0;
     out.irradiance_uW_per_cm2 = 0.0f;
+    out.wavelength = 0.0f;
     
     if (raw == NULL || cfg == NULL)
     {
@@ -120,17 +118,27 @@ veml3328_norm_rgb_t veml3328_norm_colour(const veml3328_raw_data_t *raw, const v
     }
     out.irradiance_uW_per_cm2 = veml3328_counts_to_irradiance(cfg, out.intensity_counts);
 
-    uint32_t sum = raw->red + raw->green + raw->blue;
+    int32_t r_corr = (int32_t)raw->red - (int32_t)cfg->dark_offset;
+    int32_t g_corr = (int32_t)raw->green - (int32_t)cfg->dark_offset;
+    int32_t b_corr = (int32_t)raw->blue - (int32_t)cfg->dark_offset;
+
+    if (r_corr < 0) r_corr = 0;
+    if (g_corr < 0) g_corr = 0;
+    if (b_corr < 0) b_corr = 0;
+
+    uint32_t sum = (uint32_t)r_corr + (uint32_t)g_corr + (uint32_t)b_corr;
     if (sum == 0) {
         out.red = 0.0f;
         out.green = 0.0f;
         out.blue = 0.0f;
+        out.wavelength = 0.0f;
     } else {
-        out.red = (float)raw->red / sum;
-        out.green = (float)raw->green / sum;
-        out.blue = (float)raw->blue / sum;
+        out.red = (float)r_corr / sum;
+        out.green = (float)g_corr / sum;
+        out.blue = (float)b_corr / sum;
+
+        out.wavelength = veml3328_estimate_wavelength((uint16_t)r_corr, (uint16_t)g_corr, (uint16_t)b_corr);
     }
 
-    out.wavelength = veml3328_estimate_wavelength(raw);
     return out;
 }

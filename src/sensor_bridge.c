@@ -1,0 +1,107 @@
+#include <stdint.h>
+
+#ifdef _WIN32
+    #define EXPORT __declspec(dllexport)
+#else
+    #define EXPORT __attribute__((visibility("default")))
+#endif
+
+typedef struct {
+    float R;
+    float G;
+    float B;
+    float Intensity;
+    float Wavelength;
+} SensorData;
+
+#ifndef _WIN32
+
+#include <unistd.h>
+#include "i2c_driver_pi.h"
+#include "veml3328.h"
+#include "tca9548a.h"
+
+#define I2C_DEV_PATH "/dev/i2c-1"
+#define TCA9548A_ADDR 0x70
+#define VEML3328_ADDR VEML3328_I2C_ADDR
+
+static const veml3328_cfg_t bridge_cfg_default = {
+    .gain_factor = 1.0f,
+    .dg_factor   = 1.0f,
+    .sens_factor = 1.0f,
+    .it_ms       = 100.0f,
+    .ds_it_ms    = 100.0f,
+    .dark_offset = 0
+};
+
+static float clmap_sens(int sensivity) {
+    if(sensivity <= 0) {
+        return 1.0f;
+    }
+
+    return (float)sensivity;
+}
+
+EXPORT SensorData get_sensor_readings(int channel, int sensivity) {
+    SensorData out = {0};
+
+    if (channel < 0 || channel > 7) {
+        return out;
+    }
+
+    int i2c_fd = i2c_open_bus(I2C_DEV_PATH);
+    if(i2c_fd < 0) {
+        return out;
+    }
+
+    (void)tca_disable_all(i2c_fd, TCA9548A_ADDR);
+    if(tca_select_channel(i2c_fd, TCA9548A_ADDR, channel) != TCA_OK) {
+        i2c_close_bus(i2c_fd);
+        return out;
+    }
+
+    if (veml3328_config(i2c_fd, VEML3328_ADDR) != VEML3328_OK) {
+        i2c_close_bus(i2c_fd);
+        return out;
+    }
+    
+    usleep(200000); // Wait 200ms for integration
+
+    veml3328_raw_data_t raw_data;
+    if(veml3328_read_all(i2c_fd, VEML3328_ADDR, &raw_data) != VEML3328_OK) {
+        i2c_close_bus(i2c_fd);
+        return out;
+    }
+
+    veml3328_cfg_t cfg = bridge_cfg_default;
+    cfg.sens_factor = clmap_sens(sensivity);
+
+    veml3328_norm_rgt_t norm = veml3328_norm_colour(&raw_data, &cfg);
+    out.R = norm.red;
+    out.G = norm.green;
+    out.B = norm.blue;
+    out.Intensity = norm.irradiance_uW_per_cm2;
+    out.Wavelength = norm.wavelength;
+    
+    (void)tca_disable_all(i2c_fd, TCA9548A_ADDR);
+    i2c_close_bus(i2c_fd);
+    return out;
+}
+
+#else /* ---------------- Windows implementation Mock ---------------- */
+
+EXPORT SensorData get_sensor_readings(int channel, int sensivity) {
+    (void)sensivity;
+    SensorData out = {0};
+
+    float base = (float)(channel + 1);
+    out.R = 0.10f * base;
+    out.G = 0.05f * base;
+    out.B = 0.02f * base;
+    out.Intensity = 100.0f * base;
+    out.Wavelength = 500.0f + 5.0f* base;
+    
+    return out;
+}
+
+#endif
