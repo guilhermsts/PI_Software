@@ -63,8 +63,7 @@ int main(int argc, char *argv[]) {
     }
 
     printf("TCA9548A channel %d selected.\n", channel);
-
-    veml3328_apply_cfg(fd, VEML3328_ADDR, &test_cfg);
+    usleep(1000); // 1 ms
 
     /* Configure VEML3328 sensor */
     if (veml3328_config(fd, VEML3328_ADDR) != VEML3328_OK) {
@@ -72,8 +71,22 @@ int main(int argc, char *argv[]) {
         i2c_close_bus(fd);
         return EXIT_FAILURE;
     }
+    
+    veml3328_apply_cfg(fd, VEML3328_ADDR, &test_cfg);
 
-    usleep(200000); // 200 ms
+    veml3328_cfg_t real_cfg = {0};
+    if( veml3328_read_cfg(fd, VEML3328_ADDR, &real_cfg) == VEML3328_OK ) {
+        printf("Config: IT=%.0f ms, Gain=%.1fx, DG=%.1fx, Sens=%.3f\n",
+            real_cfg.it_ms,
+            real_cfg.gain_factor,
+            real_cfg.dg_factor,
+            real_cfg.sens_factor);
+    } else {
+        fprintf(stderr, "WARNING: veml3328_read_cfg failed\n");
+    }
+
+    usleep( (useconds_t)(test_cfg.it_ms * 1000.0f) ); // wait for integration
+    
     for (int sample = 0; sample < num_samples; sample++) {
         /* Read raw data from VEML3328 */
         veml3328_raw_data_t raw_data;
@@ -99,7 +112,7 @@ int main(int argc, char *argv[]) {
         printf("Red: %d  ,  Green: %d  ,  Blue:  %d\n", R255, G255, B255);
         printf("Intensity: %.3f uW/cm^2  ,  Wavelength: %.1f\n", norm_rgb.irradiance_uW_per_cm2, norm_rgb.wavelength);
 
-        usleep(1000000);  // 1s delay between samples
+        usleep( (useconds_t)(test_cfg.it_ms * 1000.0f) ); 
     }
 
     tca_disable_all(fd, TCA9548A_ADDR);
