@@ -2,15 +2,146 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define VEML3328_CONF_DG    12  // bits 13:12
+#define VEML3328_CONF_GAIN  10  // bits 11:10
+#define VEML3328_CONF_SENS  6   // bit  6
+#define VEML3328_CONF_IT    4   // bits 5:4
+/* Keeping SD1=0, SD0=0, SD_ALS=0, AF=0, TRIG=0, reserved=0 (default values) */
+
 /* external backend functions */
 extern int i2c_write_bytes(int fd, uint8_t dev_addr, const uint8_t *buf, int length);
 //extern int i2c_read_bytes(int fd, uint8_t dev_addr, uint8_t *buf, int length);
 extern int i2c_write_read(int fd, uint8_t dev_addr, const uint8_t *write_buf, int write_length, uint8_t *read_buf, int read_length);
 
+static uint16_t encode_it_bits(float it_ms) {
+    // Datasheet: 00=50ms, 01=100ms, 10=200ms, 11=400ms
+    if (it_ms <= 50.0f) {
+        return 0b00;                // 50ms
+    } else if (it_ms <= 100.0f) {
+        return 0b01;                // 100ms
+    } else if (it_ms <= 200.0f) {
+        return 0b10;                // 200ms
+    } else {        
+        return 0b11;                // 400ms
+    }
+}
+
+static uint16_t encode_gain_bits(float gain) {
+    // Datasheet: 00=1x, 01=2x, 10=4x, 11=1/2x
+    if (gain <= 0.75f) {
+        return 0b11;                // 0.5x
+    } else if (gain <= 1.5f) {
+        return 0b00;                // 1x
+    } else if (gain <= 3.0f) {
+        return 0b01;                // 2x
+    } else {
+        return 0b10;                // 4x
+    }
+}
+
+static uint16_t encode_dg_bits(float dg) {
+    // Datasheet: 00=1x, 01=2x, 10=4x, 11=reserved (do not use)
+    if (dg <= 1.5f) {
+        return 0b00;                // 1x
+    } else if (dg <= 3.0f) {
+        return 0b01;                // 2x
+    } else {
+        return 0b10;                // 4x
+    } 
+}
+
+static uint16_t encode_sens_bits(float sens) {
+    // Datasheet: 0=normal, 1=high
+    if (sens <= 0.7f) {
+        return 1u;                  // high
+    } else {
+        return 0u;                  // low
+    }
+}
+
+static float decode_it_ms(uint16_t conf) {
+    uint16_t it_bits = (conf >> VEML3328_CONF_IT) & 0x3;
+    switch (it_bits) {
+        case 0b00: return 50.0f;
+        case 0b01: return 100.0f;
+        case 0b10: return 200.0f;
+        case 0b11: return 400.0f;
+    }
+    return 50.0f; // default fallback
+}
+
+static float decode_gain(uint16_t conf) {
+    uint16_t gain_bits = (conf >> VEML3328_CONF_GAIN) & 0x3;
+    switch (gain_bits) {
+        case 0b00: return 1.0f;
+        case 0b01: return 2.0f;
+        case 0b10: return 4.0f;
+        case 0b11: return 0.5f;
+    }
+    return 1.0f; // default fallback
+}
+
+static float decode_dg(uint16_t conf) {
+    uint16_t dg_bits = (conf >> VEML3328_CONF_DG) & 0x3;
+    switch (dg_bits) {
+        case 0b00: return 1.0f;
+        case 0b01: return 2.0f;
+        case 0b10: return 4.0f;
+        default:   return 1.0f; // reserved, fallback to 1x
+    }
+}
+
+static float decode_sens(uint16_t conf) {
+    uint16_t sens_bit = (conf >> VEML3328_CONF_SENS) & 0x1;
+    if (sens_bit == 0) {
+        return 1.0f; // normal
+    } else {
+        return (1.0f/3.0f); // high
+    }
+}
+
 /* Sensor initial configuration */
 int veml3328_config(int i2c_fd, uint8_t dev_addr) {
     uint16_t conf_value = 0x0000; // Default config
     return veml3328_write_reg(i2c_fd, dev_addr, VEML3328_REG_CONF, conf_value);
+}
+
+int veml3328_apply_cfg(int i2c_fd, uint8_t dev_addr, const veml3328_cfg_t *cfg) {
+    if (cfg == NULL){
+        return VEML3328_ERR_NULL;
+    }
+
+    uint16_t conf_value = 0x0000;   // Start with default config
+
+    conf_value |= (encode_dg_bits(cfg->dg_factor)       << VEML3328_CONF_DG);
+    conf_value |= (encode_gain_bits(cfg->gain_factor)   << VEML3328_CONF_GAIN);
+    conf_value |= (encode_sens_bits(cfg->sens_factor)   << VEML3328_CONF_SENS);
+    conf_value |= (encode_it_bits(cfg->it_ms)           << VEML3328_CONF_IT);
+
+    return veml3328_write_reg(i2c_fd, dev_addr, VEML3328_REG_CONF, conf_value);
+}
+
+int veml3328_read_cfg (int i2c_fd, uint8_t dev_addr, veml3328_cfg_t *cfg_out) {
+    if (cfg_out == NULL){
+        return VEML3328_ERR_NULL;
+    }
+
+    uint16_t conf_value = 0;
+    int ret = veml3328_read_reg(i2c_fd, dev_addr, VEML3328_REG_CONF, &conf_value);
+    if (ret != VEML3328_OK){
+        return ret;
+    }
+
+    cfg_out->it_ms       = decode_it_ms(conf_value);
+    cfg_out->gain_factor = decode_gain(conf_value);
+    cfg_out->dg_factor   = decode_dg(conf_value);
+    cfg_out->sens_factor = decode_sens(conf_value);
+    
+    // Note: ds_it_ms and dark_offset are not stored in config register
+    cfg_out->ds_it_ms    = cfg_out->it_ms; // default to same as it_ms
+    cfg_out->dark_offset = 0;               // default to 0
+
+    return VEML3328_OK;
 }
 
 /* write 16-bit register */

@@ -56,6 +56,10 @@ typedef struct {
 /* Sensor initial configuration */
 int veml3328_config(int i2c_fd, uint8_t dev_addr);
 
+int veml3328_apply_cfg(int i2c_fd, uint8_t dev_addr, const veml3328_cfg_t *cfg);
+
+int veml3328_read_cfg (int i2c_fd, uint8_t dev_addr, veml3328_cfg_t *cfg_out);
+
 /* write 16-bit address */
 int veml3328_write_reg(int i2c_fd, uint8_t dev_addr, uint8_t reg,uint16_t value);
 

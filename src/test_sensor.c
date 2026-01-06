@@ -64,6 +64,8 @@ int main(int argc, char *argv[]) {
 
     printf("TCA9548A channel %d selected.\n", channel);
 
+    veml3328_apply_cfg(fd, VEML3328_ADDR, &test_cfg);
+
     /* Configure VEML3328 sensor */
     if (veml3328_config(fd, VEML3328_ADDR) != VEML3328_OK) {
         fprintf(stderr, "ERROR: Unable to configure VEML3328 sensor\n");
