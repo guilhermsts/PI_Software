@@ -208,7 +208,9 @@ float veml3328_counts_to_irradiance(const veml3328_cfg_t *cfg, uint16_t counts) 
         return 0.0f; // Clamp to zero
     }
 
-    float R_eff = VEML3328_CLEAR_RESP_BASE * cfg->gain_factor * (cfg->it_ms / cfg->ds_it_ms) * cfg->sens_factor * cfg->dg_factor;
+    float sens_scale = (cfg->sens_factor == 0.0f) ? 1.0f : (1.0f / 3.0f);
+
+    float R_eff = VEML3328_CLEAR_RESP_BASE * cfg->gain_factor * (cfg->it_ms / cfg->ds_it_ms) * sens_scale * cfg->dg_factor;
     if (R_eff <= 0.0f) {
         return 0.0f; // Clamp to zero
     }
