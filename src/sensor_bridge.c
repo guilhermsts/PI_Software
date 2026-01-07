@@ -66,7 +66,7 @@ EXPORT SensorData get_sensor_readings(int channel, int sensivity) {
     }
 
     veml3328_cfg_t cfg = bridge_cfg_default;
-    cfg.sens_factor = (sensitivity != 0);
+    cfg.sens_factor = (sensivity != 0);
 
     (void)veml3328_apply_cfg(i2c_fd, VEML3328_ADDR, &cfg);
     
@@ -78,7 +78,7 @@ EXPORT SensorData get_sensor_readings(int channel, int sensivity) {
         return out;
     }
 
-    veml3328_norm_rgt_t norm = veml3328_norm_colour(&raw_data, &cfg);
+    veml3328_norm_rgb_t norm = veml3328_norm_colour(&raw_data, &cfg);
     out.R = norm.red;
     out.G = norm.green;
     out.B = norm.blue;
