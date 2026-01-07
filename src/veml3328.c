@@ -50,12 +50,12 @@ static uint16_t encode_dg_bits(float dg) {
     } 
 }
 
-static uint16_t encode_sens_bits(float sens) {
-    // Datasheet: 0=normal, 1=high
-    if (sens <= 0.7f) {
-        return 1u;                  // high
+static uint16_t encode_sens_bits(uint8_t low_sens_enable) {
+    // Datasheet: 0=high (default), 1=low (1/3)
+    if (low_sens_enable != 0.0f) {
+        return 1u;                  
     } else {
-        return 0u;                  // low
+        return 0u;                  
     }
 }
 

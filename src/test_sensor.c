@@ -13,7 +13,7 @@
 static const veml3328_cfg_t test_cfg = {
     .gain_factor = 4.0f,
     .dg_factor   = 2.0f,
-    .sens_factor = 1.0f,
+    .sens_factor = 0.0f,
     .it_ms       = 400.0f,
     .ds_it_ms    = 100.0f,
     .dark_offset = 0

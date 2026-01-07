@@ -26,15 +26,15 @@ typedef struct {
 #define VEML3328_ADDR VEML3328_I2C_ADDR
 
 static const veml3328_cfg_t bridge_cfg_default = {
-    .gain_factor = 1.0f,
-    .dg_factor   = 1.0f,
-    .sens_factor = 1.0f,
-    .it_ms       = 100.0f,
+    .gain_factor = 4.0f,
+    .dg_factor   = 2.0f,
+    .sens_factor = 0.0f,
+    .it_ms       = 400.0f,
     .ds_it_ms    = 100.0f,
     .dark_offset = 0
 };
 
-static float clmap_sens(int sensivity) {
+static float clamp_sens(int sensivity) {
     if(sensivity <= 0) {
         return 1.0f;
     }
@@ -64,17 +64,19 @@ EXPORT SensorData get_sensor_readings(int channel, int sensivity) {
         i2c_close_bus(i2c_fd);
         return out;
     }
+
+    veml_cfg_t cfg = bridge_cfg_default;
+    cfg.sens_factor = (sensitivity != 0);
+
+    (void)veml3328_apply_cfg(i2c_fd, VEML3328_ADDR, &cfg);
     
-    usleep(200000); // Wait 200ms for integration
+    usleep( (useconds_t)(cfg.it_ms * 1000.0f) ); // Wait for integration time
 
     veml3328_raw_data_t raw_data;
     if(veml3328_read_all(i2c_fd, VEML3328_ADDR, &raw_data) != VEML3328_OK) {
         i2c_close_bus(i2c_fd);
         return out;
     }
-
-    veml3328_cfg_t cfg = bridge_cfg_default;
-    cfg.sens_factor = clmap_sens(sensivity);
 
     veml3328_norm_rgt_t norm = veml3328_norm_colour(&raw_data, &cfg);
     out.R = norm.red;

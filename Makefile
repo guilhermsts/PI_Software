@@ -54,6 +54,15 @@ pi_app: $(BUILD_DIR) $(PI_SRC)
 pi_test_sensor: $(BUILD_DIR) $(PI_TEST_SRC)
 	$(CC) $(CFLAGS) -o $(PI_TEST_SENSOR) $(PI_TEST_SRC)
 
+BRIDGE_SO := $(BUILD_DIR)/sensor_bridge.so
+BRIDGE_SRC := $(SRC_DIR)/sensor_bridge.c $(SRC_VEML) $(SRC_TCA) $(SRC_DIR)/i2c_driver_pi.c
+
+.PHONY: bridge
+bridge: $(BUILD_DIR) $(BRIDGE_SO)
+
+$(BRIDGE_SO): $(BRIDGE_SRC)
+	$(CC) -shared -fPIC $(CFLAGS) -o $@ $(BRIDGE_SRC)
+
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
