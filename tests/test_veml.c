@@ -120,6 +120,32 @@ void test_config (void) {
     TEST_ASSERT_EQUAL_HEX16(0x0000, (dummy_written_buf[1] | (dummy_written_buf[2] << 8))); // Config value
 }
 
+void test_wavelength_red_pure(void) {
+    float wl = veml3328_estimate_wavelength(255, 0, 0);
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, VEML3328_WAVELENGTH_RED, wl);
+}
+
+void test_wavelength_green_pure(void) {
+    float wl = veml3328_estimate_wavelength(0, 255, 0);
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, VEML3328_WAVELENGTH_GREEN, wl);
+}
+
+void test_wavelength_blue_pure(void) {
+    float wl = veml3328_estimate_wavelength(0, 0, 255);
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, VEML3328_WAVELENGTH_BLUE, wl);
+}
+
+void test_wavelength_black(void) {
+    float wl = veml3328_estimate_wavelength(0, 0, 0);
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f, wl);
+}
+
+void test_wavelength_mixed(void) {
+    float wl = veml3328_estimate_wavelength(100, 100, 100);
+    float expected = (VEML3328_WAVELENGTH_RED + VEML3328_WAVELENGTH_GREEN + VEML3328_WAVELENGTH_BLUE) / 3.0f;
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, expected, wl);
+}
+
 void setUp(void) {
     // Reset dummy variables before each test
     memset(dummy_written_buf, 0, sizeof(dummy_written_buf));
@@ -143,6 +169,11 @@ int main(void) {
     RUN_TEST(test_read_raw);
     RUN_TEST(test_norm);
     RUN_TEST(test_config);
+    RUN_TEST(test_wavelength_red_pure);
+    RUN_TEST(test_wavelength_green_pure);
+    RUN_TEST(test_wavelength_blue_pure);
+    RUN_TEST(test_wavelength_black);
+    RUN_TEST(test_wavelength_mixed);
 
     return UNITY_END();
 }   
