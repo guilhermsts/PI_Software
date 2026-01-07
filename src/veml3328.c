@@ -8,10 +8,6 @@
 #define VEML3328_CONF_IT    4   // bits 5:4
 /* Keeping SD1=0, SD0=0, SD_ALS=0, AF=0, TRIG=0, reserved=0 (default values) */
 
-#define VEML3328_WAVELENGTH_RED     620.0f  // nm
-#define VEML3328_WAVELENGTH_GREEN   550.0f  // nm
-#define VEML3328_WAVELENGTH_BLUE    470.0f  // nm
-
 /* external backend functions */
 extern int i2c_write_bytes(int fd, uint8_t dev_addr, const uint8_t *buf, int length);
 //extern int i2c_read_bytes(int fd, uint8_t dev_addr, uint8_t *buf, int length);
