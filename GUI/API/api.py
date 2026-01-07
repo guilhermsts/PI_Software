@@ -27,7 +27,7 @@ class SensorResult(ctypes.Structure):
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-lib_path = os.path.join(HERE, "build", "sensor_bridge.so")
+lib_path = os.path.join(HERE, "..", "build", "sensor_bridge.so")
 lib = ctypes.CDLL(lib_path)
 
 # Define os tipos de entrada e saída da função C
