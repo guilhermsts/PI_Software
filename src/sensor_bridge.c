@@ -65,7 +65,7 @@ EXPORT SensorData get_sensor_readings(int channel, int sensivity) {
         return out;
     }
 
-    veml_cfg_t cfg = bridge_cfg_default;
+    veml3328_cfg_t cfg = bridge_cfg_default;
     cfg.sens_factor = (sensitivity != 0);
 
     (void)veml3328_apply_cfg(i2c_fd, VEML3328_ADDR, &cfg);
