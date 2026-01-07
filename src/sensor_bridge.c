@@ -34,12 +34,20 @@ static const veml3328_cfg_t bridge_cfg_default = {
     .dark_offset = 0
 };
 
-static float clamp_sens(int sensivity) {
-    if(sensivity <= 0) {
+static float clamp01(float x) {
+    if(x <= 0.0f) {
+        return 0.0f;
+    }
+    if(x >= 1.0f) {
         return 1.0f;
     }
 
-    return (float)sensivity;
+    return x;
+}
+
+static float rgb_255(float x) {
+    x = clamp01(x);
+    return (float)((int)(x * 255.0f + 0.5f));
 }
 
 EXPORT SensorData get_sensor_readings(int channel, int sensivity) {
@@ -79,9 +87,9 @@ EXPORT SensorData get_sensor_readings(int channel, int sensivity) {
     }
 
     veml3328_norm_rgb_t norm = veml3328_norm_colour(&raw_data, &cfg);
-    out.R = norm.red;
-    out.G = norm.green;
-    out.B = norm.blue;
+    out.R = rgb_255(norm.red);
+    out.G = rgb_255(norm.green);
+    out.B = rgb_255(norm.blue);
     out.Intensity = norm.irradiance_uW_per_cm2;
     out.Wavelength = norm.wavelength;
     
