@@ -22,8 +22,8 @@
 #define VEML3328_CLEAR_RESP_BASE 57.0f // from datasheet
 
 /* Peak wavelengths from datasheet */
-#define VEML3328_WAVELENGTH_RED    610.0f
-#define VEML3328_WAVELENGTH_GREEN  560.0f
+#define VEML3328_WAVELENGTH_RED    620.0f
+#define VEML3328_WAVELENGTH_GREEN  550.0f
 #define VEML3328_WAVELENGTH_BLUE   470.0f
 
 /* Raw sensor data struct*/
