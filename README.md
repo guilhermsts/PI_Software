@@ -1,5 +1,5 @@
 # Project Overview
-    This project implements a multi-sensor RGB measurement system based on the VEML3328 colour sensor and a TCA9548A I2C multiplexer, which runs on a Raspberry Pi.
+This project implements a multi-sensor RGB measurement system based on the VEML3328 colour sensor and a TCA9548A I2C multiplexer, which runs on a Raspberry Pi.
 
 # Hardware Requirements
 - Raspberry Pi (with I2C communications)
@@ -61,18 +61,18 @@ make test_tca
     Builds only the Tca9548a driver test
         >> build/test_tca
 
-```md
-## API
-### Running the API
+```
+# API
+Running the API
 ```bash
 cd GUI/API
 python3 -m venv .venv
 source .venv/bin/activate
 pip install flask flask-restful (at the first time of using the Raspberry) 
 python api.py
-```md
+```
 
-## GUI Usage
+# GUI Usage
 - Select sensors;
 - Toggle sensivity, if required;
 - Press Start;
