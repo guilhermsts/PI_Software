@@ -62,18 +62,39 @@ make test_tca
         >> build/test_tca
 
 ```
+
 # API
-Running the API
+
+This project has an REST API to ensue comunication between the I2C modules and the user interface.
+
+At the first use of the API in the raspberry these setup steps are required:
+
 ```bash
 cd GUI/API
 python3 -m venv .venv
 source .venv/bin/activate
-pip install flask flask-restful (at the first time of using the Raspberry) 
+pip install flask flask-restful
+```
+
+To start the API it is only necessary to run the `api.py` file as shown bellow:
+
+```bash
 python api.py
 ```
 
+Currently, the API has one post method on `http://{raspberry_ip}:5000/read_sensors`, this post receives the selected sensor array and the sensitivity state in JSON format, and returns the data obtained by the sensors.
+
+In order for the API to work and connect with the I2C the file `sensor_bridge.so` is required in the build folder.
+
 # GUI Usage
-- Select sensors;
+
+The Graphic user interface allows the user to:
+
+- Select the sensors necessary to the scan;
 - Toggle sensivity, if required;
-- Press Start;
-- Values update and presentation;
+- Start the simulation;
+- Update values and present them in a table and a color graph;
+
+For readability when the user hoovers a table line that value is enhanced on the color graph.
+
+This interface works as long as the device it is being used on is in the same network as the API, in order to set that network the variable `ip_raspberry` needs to be changed to the network's ip address.
