@@ -76,13 +76,13 @@ source .venv/bin/activate
 pip install flask flask-restful
 ```
 
-To start the API it is only necessary to run the `api.py` file as shown bellow:
+To start the API it is only necessary to run the `api.py` file in the API directory as shown bellow:
 
 ```bash
 python api.py
 ```
 
-Currently, the API has one post method on `http://{raspberry_ip}:5000/read_sensors`, this post receives the selected sensor array and the sensitivity state in JSON format, and returns the data obtained by the sensors.
+Currently, the API has one post method on `http://{raspberry_ip}:5000/read_sensors`, this post receives the selected sensor array and the sensitivity state in JSON format, and returns the data obtained by the sensors, also in JSON format.
 
 In order for the API to work and connect with the I2C the file `sensor_bridge.so` is required in the build folder.
 
@@ -90,11 +90,10 @@ In order for the API to work and connect with the I2C the file `sensor_bridge.so
 
 The Graphic user interface allows the user to:
 
-- Select the sensors necessary to the scan;
+- Select the sensors necessary to scan;
 - Toggle sensivity, if required;
 - Start the simulation;
 - Update values and present them in a table and a color graph;
-
-For readability when the user hoovers a table line that value is enhanced on the color graph.
+  - For readability when the user hoovers a table line that value is enhanced and labeled on the color graph.
 
 This interface works as long as the device it is being used on is in the same network as the API, in order to set that network the variable `ip_raspberry` needs to be changed to the network's ip address.
