@@ -22,8 +22,6 @@ def start_api():
     print("A iniciar a API...")
 
     # Popen para não bloquear a execução do programa principal
-    # shell=False é mais seguro
-    # stdout e stderr redirecionados para o pipe para evitar poluir a consola da GUI
     try:
         api_process = subprocess.Popen(
             API_COMMAND,
@@ -65,9 +63,17 @@ class MyGUI:
     #variaveis
     sensitivity_state = 0
     sensor_states = [0,0,0,0,0,0,0,0] 
+    error_flag = [0,0,0,0,0,0,0,0]
+
+    sensor_plots = {} 
+    sensor_texts = {} 
+
     bgcolor="#CBCBD6"
     fgcolor="#15565F"
     darkcolor="#0a1718"
+    point_unselect_color="#44464A" 
+    point_select_color="#1F232A" 
+    point_edge_color="#CFDCF2"  
 
     def __init__(self):
     
@@ -232,13 +238,26 @@ class MyGUI:
                                                    pady=10,padx=10)
             self.wavelength_dict[num].grid(row=num+1,column=6,sticky="news")
 
+            #fazer o binding para o hover do rato
+            widgets_da_linha = [
+                self.sensor_lable_dict[num], 
+                self.R_dict[num], 
+                self.G_dict[num], 
+                self.B_dict[num], 
+                self.Intensity_dict[num], 
+                self.wavelength_dict[num],
+                self.checkbox_frame[num]
+            ]
+
+            for w in widgets_da_linha:
+                w.bind("<Enter>", partial(self.highlight_point, num))
+                w.bind("<Leave>", partial(self.unhighlight_point, num))
+
         #Data e hora-------
         self.date_hour_label=tkinter.Label(self.date_hour_frame,text="Date and Time",
                                          bg = self.bgcolor,fg="#000000",
                                          font = ("Noto Sans KR Black", 38),)
         self.date_hour_label.grid(row=1,column=0, pady=10,padx=10)
-
-        
         
         now = datetime.now()
       
@@ -265,16 +284,14 @@ class MyGUI:
         self.spectrogram_plot.imshow(
             self.background_img, 
             aspect='auto',        # Ajustar a imagem para preencher o espaço do subplot
-            extent=[0, 900, 0, 100], # Define a área (xmin, xmax, ymin, ymax) onde a imagem aparece. 
-                                       # Mude isto para os limites do seu gráfico!
-                                       # Exemplo: 400nm a 700nm e intensidade 0 a 100.
+            extent=[400, 700, 0, 10], # Define a área (xmin, xmax, ymin, ymax) onde a imagem aparece. 
             zorder=0,               # Zorder 0 (por baixo das linhas do gráfico)
             alpha=0.7)
 
         self.canvas_widget.pack(fill=tkinter.BOTH, expand=True)
-        self.spectrogram_plot.set_title('Espectro de Luz dos LEDs Selecionados', fontsize=12, color=self.fgcolor)
-        self.spectrogram_plot.set_xlabel('Comprimento de Onda (nm)', fontsize=10)
-        self.spectrogram_plot.set_ylabel('Intensidade Relativa', fontsize=10)
+        self.spectrogram_plot.set_title('Light Spectrum of the selected LEDs', fontsize=12, color=self.fgcolor)
+        self.spectrogram_plot.set_xlabel('Wavelength (nm)', fontsize=10)
+        self.spectrogram_plot.set_ylabel('Relative Intensity', fontsize=10)
         self.spectrogram_plot.tick_params(axis='x', colors=self.darkcolor)
         self.spectrogram_plot.tick_params(axis='y', colors=self.darkcolor)
         self.canvas.draw()
@@ -291,7 +308,6 @@ class MyGUI:
             # Abrir a imagem
             img = Image.open(image_path)
 
-            # Redimensionar para caber na figura (opcional, mas recomendado)
             target_size = (self.fig.get_size_inches() * self.fig.dpi).astype(int)
             img = img.resize(target_size) 
             
@@ -395,15 +411,14 @@ class MyGUI:
       
         self.date_label.config(text=now.strftime("%d/%m/%Y"))
         self.hour_label.config(text = now.strftime("%H:%M:%S"))
-        
-        
-        url = "http://localhost:5000/read_sensors"
+
+        ip_raspberry = "10.54.117.64" 
+        url = f"http://{ip_raspberry}:5000/read_sensors"
 
         data = {
             "sensors": self.sensor_states,
             "sensitivity": self.sensitivity_state
             }
-        
         
         self.waiting_window("the simulation \nis running ",url,data)
 
@@ -411,14 +426,27 @@ class MyGUI:
         if response.status_code == 200:
             sensor_array = response.json()
 
+        self.error_flag = [0,0,0,0,0,0,0,0]
+        
         i=0
+        max_int=10
+        
         for i in range(len(self.sensor_states)):
             if self.sensor_states[i] == 1 :
                 self.R_dict[i+1].config(text = str(round(sensor_array[i]["R"])))
-                self.G_dict[i+1].config(text = str(round(sensor_array[i]["G"])))
-                self.B_dict[i+1].config(text = str(round(sensor_array[i]["B"])))
-                self.Intensity_dict[i+1].config(text = str(round(sensor_array[i]["Intensity"])))
+                self.G_dict[i+1].config(text = str(round(sensor_array[i]["B"])))
+                self.B_dict[i+1].config(text = str(round(sensor_array[i]["G"])))
+                self.Intensity_dict[i+1].config(text = str(round(sensor_array[i]["Intensity"],2)))
                 self.wavelength_dict[i+1].config(text = str(round(sensor_array[i]["Wavelength"])))
+
+                #dar erro se medir um comprimento de onda fora do limite de visibilidade
+                if(sensor_array[i]["Wavelength"] > 399 and sensor_array[i]["Wavelength"] < 701):
+                    if sensor_array[i]["Intensity"] > max_int:
+                            max_int = sensor_array[i]["Intensity"]
+                else:
+                    self.wavelength_dict[i+1].config(text = "ERROR")
+                    self.error_flag[i] = 1
+
             else:
                 self.R_dict[i+1].config(text = str(sensor_array[i]["R"]))
                 self.G_dict[i+1].config(text = str(sensor_array[i]["G"]))
@@ -427,47 +455,81 @@ class MyGUI:
                 self.wavelength_dict[i+1].config(text = str(sensor_array[i]["Wavelength"]))
 
 
-        #lipar o espectrograma
+        #limpar o espectrograma
         self.spectrogram_plot.clear()
 
         self.spectrogram_plot.imshow(
             self.background_img, 
             aspect='auto',        # Ajustar a imagem para preencher o espaço do subplot
-            extent=[400, 700, 0, 100], # Define a área (xmin, xmax, ymin, ymax) onde a imagem aparece. 
-                                       # Mude isto para os limites do seu gráfico!
-                                       # Exemplo: 400nm a 700nm e intensidade 0 a 100.
+            extent=[400, 700, 0, max_int+2], # Define a área (xmin, xmax, ymin, ymax) onde a imagem aparece. 
             zorder=0,               # Zorder 0 (por baixo das linhas do gráfico)
             alpha=0.7)
             
         # Percorrer os dados de todos os sensores
         for i in range(len(self.sensor_states)):
-            # Verificar se o sensor está selecionado E tem dados (depende da sua API)
+            # Verificar se o sensor está selecionado E tem dados 
             if self.sensor_states[i] == 1:
+                #não desenhar quando o wavelength estiver fora do espectro visivel
+                if(sensor_array[i]["Wavelength"] < 400 or sensor_array[i]["Wavelength"] > 700):
+                    continue
 
-                sensor_data = sensor_array[i] # Exemplo usando seu sensor_array
-                # 3. Plotar o espectro (linha)
-                self.spectrogram_plot.scatter(sensor_data["Wavelength"],sensor_data["Intensity"], 
+                sensor_data = sensor_array[i] 
+                #Plotar o espectro 
+                point = self.spectrogram_plot.scatter(sensor_data["Wavelength"],sensor_data["Intensity"], 
                                         linewidth=2, color = "#1F232A")
-                
-                 # 4. Configurar o gráfico
-                self.spectrogram_plot.set_title('Espectro de Luz dos LEDs Selecionados', fontsize=12, color=self.fgcolor)
-                self.spectrogram_plot.set_xlabel('Comprimento de Onda (nm)', fontsize=10)
-                self.spectrogram_plot.set_ylabel('Intensidade Relativa', fontsize=10)
+                self.sensor_plots[i+1] = point 
+
+                #texto
+                txt = self.spectrogram_plot.text(
+                    sensor_data["Wavelength"], sensor_data["Intensity"] + (max_int * 0.05),str(i+1),
+                    fontsize=12, fontweight='bold',ha='center',va='bottom',
+                    color=self.darkcolor,zorder=11,
+                    bbox=dict(facecolor='white', alpha=0.7, edgecolor='none', boxstyle='round,pad=0.2')
+                )                
+                txt.set_visible(False) 
+                self.sensor_texts[i+1] = txt
+
+
+                #Configurar o gráfico
+                self.spectrogram_plot.set_title('Light Spectrum of the selected LEDs', fontsize=12, color=self.fgcolor)
+                self.spectrogram_plot.set_xlabel('Wavelength (nm)', fontsize=10)
+                self.spectrogram_plot.set_ylabel('Relative Intensity', fontsize=10)
                 self.spectrogram_plot.tick_params(axis='x', colors=self.darkcolor)
                 self.spectrogram_plot.tick_params(axis='y', colors=self.darkcolor)
                 self.spectrogram_plot.grid(True, linestyle='--', alpha=0.6,color=self.fgcolor)
-                #self.spectrogram_plot.set_xlim(400, 700) # Exemplo
-                #self.spectrogram_plot.set_ylim(0, 100) # Exemplo
-                    # 5. Redesenhar o Canvas do Tkinter para mostrar o gráfico atualizado
        
                 self.canvas.draw()
 
         window_to_close.after(0, window_to_close.destroy)
 
-       
-    def maketime(self):
-        time.sleep(0.5) 
-        self.label_text.set("GRAFICO AQUI")
+    #funções para mexer no gráfico
+    def highlight_point(self, sensor_num, event):
+       print(sensor_num)
+       if sensor_num in self.sensor_plots:
+        # Muda a cor e aumenta o tamanho
+        self.sensor_plots[sensor_num].set_facecolor(self.point_select_color)
+        self.sensor_plots[sensor_num].set_edgecolor(self.point_edge_color)
+        self.sensor_plots[sensor_num].set_sizes([200]) # Ponto maior
+        self.sensor_plots[sensor_num].set_zorder(10)   # Traz para a frente
+
+        if sensor_num in self.sensor_texts:
+            self.sensor_texts[sensor_num].set_visible(True)
+
+        self.canvas.draw_idle() # Atualiza o gráfico
+
+    def unhighlight_point(self, sensor_num, event):
+        if sensor_num in self.sensor_plots:
+            # Volta ao normal
+            self.sensor_plots[sensor_num].set_facecolor(self.point_unselect_color)
+            self.sensor_plots[sensor_num].set_edgecolor(self.point_unselect_color)
+            self.sensor_plots[sensor_num].set_sizes([50])
+            self.sensor_plots[sensor_num].set_zorder(3)
+
+            # ESCONDER o número
+        if sensor_num in self.sensor_texts:
+            self.sensor_texts[sensor_num].set_visible(False)
+
+            self.canvas.draw_idle()
 
     #botão da sensibilidade
     def sensitivity_toggle(self):
@@ -501,5 +563,4 @@ class MyGUI:
 
 #-------------
 
-start_api()
 MyGUI()

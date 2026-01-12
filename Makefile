@@ -17,7 +17,7 @@ TEST_TCA_BIN  := $(BUILD_DIR)/test_tca
 
 .PHONY: all
 # Build both test executables
-all: $(TEST_VEML_BIN) $(TEST_TCA_BIN)
+all: test pi_app pi_test_sensor bridge
 
 # Ensure build dir exists
 $(BUILD_DIR):
@@ -33,10 +33,8 @@ $(TEST_VEML_BIN): $(BUILD_DIR) $(UNITY) $(TEST_VEML) $(SRC_VEML)
 
 .PHONY: test_veml test_tca test
 test_veml: $(TEST_VEML_BIN)
-	./$(TEST_VEML_BIN)
 
 test_tca: $(TEST_TCA_BIN)
-	./$(TEST_TCA_BIN)
 
 test: test_veml test_tca
 

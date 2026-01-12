@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "i2c_driver.h"
+#include "i2c_driver_pi.h"
 #include "veml3328.h"
 #include "tca9548a.h"
 
-#define I2C_DEV_PATH    "/dev/i2c-1"  // !!!!!!!!! verificar na Pi ver comando "ls /dev/i2c* (chatgpt)"
+#define I2C_DEV_PATH    "/dev/i2c-1"  // verificar na Raspberry com o comando "ls /dev/i2c* "
 #define TCA9548A_ADDR   0x70
 #define VEML3328_ADDR   VEML3328_I2C_ADDR
 #define NUM_CHANNELS    8
