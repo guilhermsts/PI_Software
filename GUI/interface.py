@@ -434,8 +434,8 @@ class MyGUI:
         for i in range(len(self.sensor_states)):
             if self.sensor_states[i] == 1 :
                 self.R_dict[i+1].config(text = str(round(sensor_array[i]["R"])))
-                self.G_dict[i+1].config(text = str(round(sensor_array[i]["B"])))
-                self.B_dict[i+1].config(text = str(round(sensor_array[i]["G"])))
+                self.G_dict[i+1].config(text = str(round(sensor_array[i]["G"])))
+                self.B_dict[i+1].config(text = str(round(sensor_array[i]["B"])))
                 self.Intensity_dict[i+1].config(text = str(round(sensor_array[i]["Intensity"],2)))
                 self.wavelength_dict[i+1].config(text = str(round(sensor_array[i]["Wavelength"])))
 

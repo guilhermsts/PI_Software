@@ -60,8 +60,8 @@ def read_sensors():
             sensor_result=lib.get_sensor_readings(i,int(sensitivity))
 
             sen_data[0] = sensor_result.R
-            sen_data[1] = sensor_result.B
-            sen_data[2] = sensor_result.G
+            sen_data[1] = sensor_result.G
+            sen_data[2] = sensor_result.B
             sen_data[3] = sensor_result.Intensity
             sen_data[4] = sensor_result.Wavelength
 
