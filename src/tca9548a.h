@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 // Error codes
-#define TCA_OK 0
-#define TCA_ERR_I2C_WRITE -1
-#define TCA_ERR_I2C_READ -2
+#define TCA_OK              0
+#define TCA_ERR_I2C_WRITE   -1
+#define TCA_ERR_I2C_READ    -2
 #define TCA_INVALID_CHANNEL 0xFF
 
 /* Considering A0, A1, A2 pins are grounded */

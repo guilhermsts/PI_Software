@@ -94,7 +94,7 @@ static float decode_dg(uint16_t conf) {
 static float decode_sens(uint16_t conf) {
     uint16_t sens_bit = (conf >> VEML3328_CONF_SENS) & 0x1;
     if (sens_bit == 0) {
-        return 1.0f; // normal
+        return 1.0f;        // normal
     } else {
         return (1.0f/3.0f); // high
     }
@@ -137,8 +137,7 @@ int veml3328_read_cfg (int i2c_fd, uint8_t dev_addr, veml3328_cfg_t *cfg_out) {
     cfg_out->dg_factor   = decode_dg(conf_value);
     cfg_out->sens_factor = decode_sens(conf_value);
     
-    // Note: ds_it_ms and dark_offset are not stored in config register
-    cfg_out->ds_it_ms    = cfg_out->it_ms; // default to same as it_ms
+    cfg_out->ds_it_ms    = cfg_out->it_ms;  // default to same as it_ms
     cfg_out->dark_offset = 0;               // default to 0
 
     return VEML3328_OK;
@@ -163,11 +162,6 @@ int veml3328_read_reg(int i2c_fd, uint8_t dev_addr, uint8_t reg, uint16_t *out) 
     if (out == NULL){
         return VEML3328_ERR_NULL;
     }
-    
-    /* Write register pointer
-    if (i2c_write_bytes(i2c_fd, dev_addr, &reg, 1) != 0){
-        return VEML3328_ERR_I2C;
-    }*/
 
     uint8_t buf[2];
     // Read 2 bytes (LSB and MSB)
