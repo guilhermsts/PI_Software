@@ -112,6 +112,7 @@ sudo raspi-config
 sudo reboot
 ```
 Although I2C can be enabled through the Raspberry Pi desktop interface, `sudo raspi-config` is recommended as it works in headless and remote configurations.
+
 **Install required system packages**
 ```bash
 sudo apt update
