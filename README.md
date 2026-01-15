@@ -104,7 +104,7 @@ To operate the system, the following devices must be connected to the same local
 - PC accessing the Raspberry Pi via SSH;
 - PC running the GUI;
 
-## One-time Raspberry Pi setup
+### One-time Raspberry Pi setup
 **Enable I2C**
 ```bash
 sudo raspi-config
@@ -118,7 +118,7 @@ sudo apt update
 sudo apt install -y git build-essential python3 python3-venv
 ```
 
-## Initial Rapsberry Pi Access
+### Initial Rapsberry Pi Access
 The Raspberry Pi can be accessed remotely via SSH.
 
 To obtain the IP address, run:
@@ -133,18 +133,18 @@ ssh <username>@<ip_address>
 The username depends on the operating system configuration. In this project setup, the default user was `raspgui`.
 When deploying the system in a production environment, it is recommended that the organisation creates and manages its own user accounts and credentials.
 
-## Project Location
+### Project Location
 After connecting via SSH, navigate to the project directory:
 ```bash
 cd ~/Desktop/PI_Software
 ```
 
-## Building the Software
+### Building the Software
 To compile all required binaries and libraries:
 ```bash
 make
 ```
-This will generate the files refered later.
+This will generate the files referred to later.
 
 To compile only the shared library used by the API:
 ```bash
@@ -152,7 +152,7 @@ make bridge
 ```
 **Note**: The shared library `sensor_bridge.so` is loaded automatically by the REST API and does not need to be exectuted manually.
 
-## Running the REST API
+### Running the REST API
 Navigate to the API directory, inside the project directory:
 ```bash
 cd GUI/API
@@ -173,5 +173,5 @@ python api.py
 
 The API will be available at `http://<raspberry_ip>:5000`
 
-## Running the GUI
+### Running the GUI
 .....
