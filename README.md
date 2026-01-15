@@ -23,7 +23,7 @@ This project implements a multi-sensor RGB measurement system based on the VEML3
     - Tests: test_tca.c, test_veml.c
 - `build/`- Compiled files and shared library
 - `GUI/` - GUI files 
-- `GUI/API/` - REST API (Python)
+- `API/` - REST API (Python)
 - `Makefile` - Build system
 
 In the project was included a Makefile to facilitate the compilation process. There is the possibility of compiling everything at the same time, through the comand "make" in the main folder. Or choosing to compile only a couple of files, to do so (compilation instructions):
@@ -60,7 +60,6 @@ make test_veml
 make test_tca 
     Builds only the Tca9548a driver test
         >> build/test_tca
-
 ```
 
 # API
@@ -68,7 +67,6 @@ make test_tca
 This project has an REST API to ensue comunication between the I2C modules and the user interface.
 
 At the first use of the API in the raspberry these setup steps are required:
-
 ```bash
 cd GUI/API
 python3 -m venv .venv
@@ -77,7 +75,6 @@ pip install flask flask-restful
 ```
 
 To start the API it is only necessary to run the `api.py` file in the API directory as shown bellow:
-
 ```bash
 python api.py
 ```
@@ -156,7 +153,7 @@ make bridge
 ### Running the REST API
 Navigate to the API directory, inside the project directory:
 ```bash
-cd GUI/API
+cd API
 ```
 Create and activate a Python virtual environment:
 ```bash
