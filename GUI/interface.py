@@ -284,7 +284,7 @@ class MyGUI:
         self.spectrogram_plot.imshow(
             self.background_img, 
             aspect='auto',        # Ajustar a imagem para preencher o espaço do subplot
-            extent=[400, 700, 0, 10], # Define a área (xmin, xmax, ymin, ymax) onde a imagem aparece. 
+            extent=[400, 720, 0, 10], # Define a área (xmin, xmax, ymin, ymax) onde a imagem aparece. 
             zorder=0,               # Zorder 0 (por baixo das linhas do gráfico)
             alpha=0.7)
 
@@ -534,13 +534,12 @@ class MyGUI:
     #botão da sensibilidade
     def sensitivity_toggle(self):
         if self.sensitivity_state: 
-            self.button_sensitivity.config(bg="#3A3A3E",fg="#000000")
-            self.sensitivity_state = 1
-        else:
             self.button_sensitivity.config(bg = self.fgcolor,fg = self.bgcolor)
             self.sensitivity_state = 0
-            
-        print("sensitivity")
+        else:
+            self.button_sensitivity.config(bg="#3A3A3E",fg="#000000")
+            self.sensitivity_state = 1
+
     #----------~
     #abrir nova janela
     def waiting_window(self,message,url,data):
