@@ -461,7 +461,7 @@ class MyGUI:
         self.spectrogram_plot.imshow(
             self.background_img, 
             aspect='auto',        # Ajustar a imagem para preencher o espaço do subplot
-            extent=[400, 700, 0, max_int+2], # Define a área (xmin, xmax, ymin, ymax) onde a imagem aparece. 
+            extent=[400, 720, 0, max_int+2], # Define a área (xmin, xmax, ymin, ymax) onde a imagem aparece. 
             zorder=0,               # Zorder 0 (por baixo das linhas do gráfico)
             alpha=0.7)
             

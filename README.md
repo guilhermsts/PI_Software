@@ -175,4 +175,18 @@ python api.py
 The API will be available at `http://<raspberry_ip>:5000`
 
 ### Running the GUI
-.....
+
+Before opening the gui please check if the variable `ip_raspberry` is equal to the <raspberry_ip>, since this is required to ensue the API -> GUI communication.
+
+When the API is turned on, go to the GUI folder and run:
+```bash
+python interface.py
+```
+
+When the GUI is runnin in order to select which sensors to read the user must select on the checkboxes that are on the table.
+
+To change the sensor reading sensitivity the user must click on the sensitivity button, when this button is selected (blue) it means that the sensitivity is on and the sensor is reading it in full, if this button is turned off (grey) the intensity is around a third of the full value.
+
+To start the simulation press the start button, a waiting window will show up while the sensor readings are in process, and afterwards the results will show up on the table and the graph, when the user hovers the mouse over a line in the table the corresponding value is enhanced on the graph.
+
+If the computed wavelength values are under 400 or over 720 the table will show an error since this means that the wavelength is outside of the visible light spectrum and there must have been an measuring error. 
