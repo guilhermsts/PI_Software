@@ -97,3 +97,81 @@ The Graphic user interface allows the user to:
   - For readability when the user hoovers a table line that value is enhanced and labeled on the color graph.
 
 This interface works as long as the device it is being used on is in the same network as the API, in order to set that network the variable `ip_raspberry` needs to be changed to the network's ip address.
+
+# Use Examlpe
+To operate the system, the following devices must be connected to the same local network:
+- Raspberry P;
+- PC accessing the Raspberry Pi via SSH;
+- PC running the GUI;
+
+## One-time Raspberry Pi setup
+**Enable I2C**
+```bash
+sudo raspi-config
+# Interface Options -> I2C -> Enable
+sudo reboot
+```
+Although I2C can be enabled through the Raspberry Pi desktop interface, `sudo raspi-config` is recommended as it works in headless and remote configurations.
+**Install required system packages**
+```bash
+sudo apt update
+sudo apt install -y git build-essential python3 python3-venv
+```
+
+## Initial Rapsberry Pi Access
+The Raspberry Pi can be accessed remotely via SSH.
+
+To obtain the IP address, run:
+```bash
+hostname -I
+```
+Then connect from another machine:
+```bash
+ssh <username>@<ip_address>
+```
+
+The username depends on the operating system configuration. In this project setup, the default user was `raspgui`.
+When deploying the system in a production environment, it is recommended that the organisation creates and manages its own user accounts and credentials.
+
+## Project Location
+After connecting via SSH, navigate to the project directory:
+```bash
+cd ~/Desktop/PI_Software
+```
+
+## Building the Software
+To compile all required binaries and libraries:
+```bash
+make
+```
+This will generate the files refered later.
+
+To compile only the shared library used by the API:
+```bash
+make bridge
+```
+**Note**: The shared library `sensor_bridge.so` is loaded automatically by the REST API and does not need to be exectuted manually.
+
+## Running the REST API
+Navigate to the API directory, inside the project directory:
+```bash
+cd GUI/API
+```
+Create and activate a Python virtual environment:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+Install dependencies (only required once per system):
+```bash
+pip install flask flask-restful
+```
+Start the API:
+```bash
+python api.py
+```
+
+The API will be available at `http://<raspberry_ip>:5000`
+
+## Running the GUI
+.....
