@@ -68,7 +68,7 @@ This project has an REST API to ensue comunication between the I2C modules and t
 
 At the first use of the API in the raspberry these setup steps are required:
 ```bash
-cd GUI/API
+cd API
 python3 -m venv .venv
 source .venv/bin/activate
 pip install flask flask-restful
