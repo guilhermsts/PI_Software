@@ -95,7 +95,7 @@ The Graphic user interface allows the user to:
 
 This interface works as long as the device it is being used on is in the same network as the API, in order to set that network the variable `ip_raspberry` needs to be changed to the network's ip address.
 
-# Use Examlpe
+# Use Example
 To operate the system, the following devices must be connected to the same local network:
 - Raspberry P;
 - PC accessing the Raspberry Pi via SSH;
